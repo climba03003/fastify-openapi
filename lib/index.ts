@@ -7,7 +7,7 @@ import { TransformOptions, validateTransformOption } from './utils/options'
 import { addRoutes, RoutesOptions } from './utils/routes'
 
 export interface OpenAPIPluginOptions extends Partial<TransformOptions>{
-  document?: OpenAPIV3.Document | OpenAPIV3_1.Document
+  document?: Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>
   preset?: string
   routes?: Partial<RoutesOptions>
 }
