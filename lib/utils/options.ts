@@ -1,15 +1,18 @@
+import { FastifyInstance, RouteOptions } from 'fastify'
+import { OpenAPIV3 } from 'openapi-types'
 import { OpenAPIPluginOptions } from '..'
 import * as OpenAPIPreset from '../presets/openapi'
+import { ParameterSchema } from './transform'
 
 export interface TransformOptions {
-  prepareFullDocument: Function
-  transformPath: Function
-  transformQuery: Function
-  transformParam: Function
-  transformHeader: Function
-  transformCookie: Function
-  transformBody: Function
-  transformResponse: Function
+  prepareFullDocument: (this: FastifyInstance, bucket: Map<{ method: string, path: string}, OpenAPIV3.OperationObject>) => OpenAPIV3.Document
+  transformPath: (this: FastifyInstance, method: string, path: string, routeOptions: RouteOptions) => OpenAPIV3.OperationObject
+  transformQuery: (this: FastifyInstance, method: string, path: string, parameterSchema: ParameterSchema) => OpenAPIV3.ParameterObject
+  transformParam: (this: FastifyInstance, method: string, path: string, parameterSchema: ParameterSchema) => OpenAPIV3.ParameterObject
+  transformHeader: (this: FastifyInstance, method: string, path: string, parameterSchema: ParameterSchema) => OpenAPIV3.ParameterObject
+  transformCookie: (this: FastifyInstance, method: string, path: string, parameterSchema: ParameterSchema) => OpenAPIV3.ParameterObject
+  transformBody: (this: FastifyInstance, method: string, path: string, consumes: string[] | undefined, jsonSchema: unknown) => OpenAPIV3.RequestBodyObject
+  transformResponse: (this: FastifyInstance, method: string, path: string, produces: string[] | undefined, jsonSchema: unknown) => OpenAPIV3.ResponsesObject
 }
 
 /**

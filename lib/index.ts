@@ -6,20 +6,10 @@ import { addHooks } from './utils/hooks'
 import { TransformOptions, validateTransformOption } from './utils/options'
 import { addRoutes, RoutesOptions } from './utils/routes'
 
-export interface OpenAPIPluginOptions {
+export interface OpenAPIPluginOptions extends Partial<TransformOptions>{
   document?: OpenAPIV3.Document | OpenAPIV3_1.Document
   preset?: string
   routes?: Partial<RoutesOptions>
-
-  // transform
-  prepareFullDocument?: Function
-  transformPath?: Function
-  transformQuery?: Function
-  transformParam?: Function
-  transformHeader?: Function
-  transformCookie?: Function
-  transformBody?: Function
-  transformResponse?: Function
 }
 
 declare module 'fastify' {
@@ -29,6 +19,22 @@ declare module 'fastify' {
       bucket: RouteBucket
       document: OpenAPIV3.Document | OpenAPIV3_1.Document
     }
+  }
+
+  interface FastifySchema {
+    hide?: boolean
+    tags?: string[]
+    summary?: string
+    description?: string
+    externalDocs?: OpenAPIV3.ExternalDocumentationObject
+    operationId?: string
+    cookies?: unknown
+    consumes?: string[]
+    produces?: string[]
+    callbacks?: { [callback: string]: OpenAPIV3.CallbackObject }
+    deprecated?: boolean
+    security?: Array<{ [securityLabel: string]: string[] }>
+    servers?: OpenAPIV3.ServerObject[]
   }
 }
 

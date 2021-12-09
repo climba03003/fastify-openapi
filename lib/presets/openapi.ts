@@ -32,7 +32,7 @@ export function prepareFullDocument (this: FastifyInstance, bucket: Map<{ method
 export function transformPath (this: FastifyInstance, method: string, path: string, options: RouteOptions): any {
   const parameters: any[] = []
   const pathSchema: any = { parameters }
-  const schema: any = options.schema
+  const schema = options.schema
   if (schema !== undefined) {
     // we copy most of the property that do not need to mutate
     if (schema.tags !== undefined) pathSchema.tags = schema.tags
