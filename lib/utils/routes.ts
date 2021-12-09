@@ -36,7 +36,7 @@ export function addRoutes (this: FastifyInstance, options: RoutesOptions): void 
       </head>
       <body>
         <elements-api
-          apiDescriptionUrl="${options.prefix + options.document}"
+          apiDescriptionUrl="${this.prefix + options.prefix + options.document}"
           router="hash"
         />
       </body>
