@@ -14,7 +14,8 @@ export function mergeDocument (this: FastifyInstance, _name: string, base: Parti
     paths: {}
   }
 
-  return deepMerge.all([dummy, base, document])
+  // allow non-exist base and document
+  return deepMerge.all([dummy, base ?? {}, document ?? {}])
 }
 
 export const prepareFullDocument: PrepareFullDocumentFunc = function (_name, document: any, bucket) {

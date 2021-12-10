@@ -11,7 +11,7 @@ export interface OpenAPIPluginOptions extends Partial<TransformOptions>{
   // base document
   document?: Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>
   // if you need to use different base document for different role
-  documents: Record<string, Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>>
+  documents?: Record<string, Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>>
   // use which preset to handle the route data
   preset?: string
   // route options to provide document and ui
@@ -50,10 +50,13 @@ const OpenAPI: FastifyPluginAsync<OpenAPIPluginOptions> = async function (fastif
   fastify.decorate('openapi', {
     transform: validateTransformOption(options),
     document: options.document ?? {},
-    documents: options.documents ?? {
-      // we provide default as fallback
-      default: {}
-    }
+    documents: DeepMerge(
+      {
+        // we provide default as fallback
+        default: {}
+      },
+      options.documents ?? {}
+    )
   })
 
   const routes = DeepMerge(
