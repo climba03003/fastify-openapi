@@ -62,13 +62,12 @@ const OpenAPI: FastifyPluginAsync<OpenAPIPluginOptions> = async function (fastif
   const routes = DeepMerge(
     {
       prefix: '/documentation',
-      documents: [
-        {
-          name: 'default',
+      documents: {
+        default: {
           ui: '/',
           document: '/openapi.json'
         }
-      ]
+      }
     },
     options.routes ?? {}
   )

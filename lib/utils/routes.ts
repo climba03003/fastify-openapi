@@ -2,12 +2,11 @@ import { FastifyInstance } from 'fastify'
 
 export interface RoutesOptions {
   prefix: string
-  documents: Array<{ name: string, ui: string, document: string }>
+  documents: Record<string, { ui: string, document: string }>
 }
 
 export function addRoutes (this: FastifyInstance, options: RoutesOptions): void {
-  for (let i = 0; i < options.documents.length; i++) {
-    const { name, ui, document } = options.documents[i]
+  for (const [name, { ui, document }] of Object.entries(options.documents)) {
     this.get(options.prefix + document, async (_, reply) => {
       return await reply.send(this.openapi.documents[name])
     })
