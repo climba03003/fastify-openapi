@@ -3,14 +3,14 @@ import { FastifyInstance, RouteShorthandOptions } from 'fastify'
 
 export interface RoutesOptions {
   prefix: string
-  documents: Record<string, { ui: string, document: string, uiRouteOption: RouteShorthandOptions, documentRouteOption: RouteShorthandOptions }>
+  documents: Record<string, { ui: string, document: string, uiRouteOption?: RouteShorthandOptions, documentRouteOption?: RouteShorthandOptions }>
 }
 
 export function addRoutes (this: FastifyInstance, options: RoutesOptions): void {
   for (const [name, { ui, document, uiRouteOption, documentRouteOption }] of Object.entries(options.documents)) {
     this.get(
       options.prefix + document,
-      DeepMerge({ schema: { hide: true } }, uiRouteOption),
+      DeepMerge({ schema: { hide: true } }, uiRouteOption ?? {}),
       async (_, reply) => {
         return await reply.send(this.openapi.documents[name])
       }
@@ -26,7 +26,7 @@ export function addRoutes (this: FastifyInstance, options: RoutesOptions): void 
             done()
           }
         },
-        documentRouteOption
+        documentRouteOption ?? {}
       ),
       async (_, reply) => {
         return await reply.header('content-type', 'text/html').send(`
