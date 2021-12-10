@@ -1,6 +1,5 @@
 import { FastifyInstance } from 'fastify'
-import { createBucket } from './bucket'
-import { prepareDocument } from './prepare'
+import { prepareDocumentBucket, prepareRouteBucket } from './prepare'
 
 export function addHooks (this: FastifyInstance): void {
   const routes: any[] = []
@@ -19,7 +18,13 @@ export function addHooks (this: FastifyInstance): void {
    * 2. we start prepare the json doc for openapi
    */
   this.addHook('onReady', function () {
-    this.openapi.bucket = createBucket(routes)
-    this.openapi.document = prepareDocument.call(this)
+    this.openapi.bucket = prepareRouteBucket(routes, this.openapi.transform.isRouteBelongTo)
+    const documentBucket = prepareDocumentBucket(this.openapi.bucket, this.openapi.transform)
+
+    for (const [name, value] of documentBucket.entries()) {
+      const document = this.openapi.transform.mergeDocument(name, this.openapi.document, this.openapi.documents?.[name])
+      if (this.openapi.documents === undefined) this.openapi.documents = Object.create(null)
+      this.openapi.documents[name] = this.openapi.transform.prepareFullDocument(name, document, value)
+    }
   })
 }

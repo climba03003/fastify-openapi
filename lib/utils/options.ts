@@ -1,18 +1,37 @@
-import { FastifyInstance, RouteOptions } from 'fastify'
-import { OpenAPIV3 } from 'openapi-types'
+import { RouteOptions } from 'fastify'
+import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types'
 import { OpenAPIPluginOptions } from '..'
 import * as OpenAPIPreset from '../presets/openapi'
+import { OperationBucket } from './prepare'
 import { ParameterSchema } from './transform'
 
+export type IsRouteBelongToFunc = (routeOptions: RouteOptions) => string
+export type MergeDocumentFunc = (name: string, base: Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>, document: Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>) => Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>
+export type PrepareFullDocumentFunc = (name: string, document: Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>, bucket: OperationBucket) => OpenAPIV3.Document
+export type TransformPathFunc = (transform: TransformOptions, method: string, path: string, routeOptions: RouteOptions) => OpenAPIV3.OperationObject
+export type TransformQueryFunc =(method: string, path: string, parameterSchema: ParameterSchema) => OpenAPIV3.ParameterObject
+export type TransformParamFunc = (method: string, path: string, parameterSchema: ParameterSchema) => OpenAPIV3.ParameterObject
+export type TransformHeaderFunc = (method: string, path: string, parameterSchema: ParameterSchema) => OpenAPIV3.ParameterObject
+export type TransformCookieFunc = (method: string, path: string, parameterSchema: ParameterSchema) => OpenAPIV3.ParameterObject
+export type TransformBodyFunc = (method: string, path: string, consumes: string[] | undefined, jsonSchema: unknown) => OpenAPIV3.RequestBodyObject
+export type TransformResponseFunc = (method: string, path: string, produces: string[] | undefined, jsonSchema: unknown) => OpenAPIV3.ResponsesObject
+
 export interface TransformOptions {
-  prepareFullDocument: (this: FastifyInstance, bucket: Map<{ method: string, path: string}, OpenAPIV3.OperationObject>) => OpenAPIV3.Document
-  transformPath: (this: FastifyInstance, method: string, path: string, routeOptions: RouteOptions) => OpenAPIV3.OperationObject
-  transformQuery: (this: FastifyInstance, method: string, path: string, parameterSchema: ParameterSchema) => OpenAPIV3.ParameterObject
-  transformParam: (this: FastifyInstance, method: string, path: string, parameterSchema: ParameterSchema) => OpenAPIV3.ParameterObject
-  transformHeader: (this: FastifyInstance, method: string, path: string, parameterSchema: ParameterSchema) => OpenAPIV3.ParameterObject
-  transformCookie: (this: FastifyInstance, method: string, path: string, parameterSchema: ParameterSchema) => OpenAPIV3.ParameterObject
-  transformBody: (this: FastifyInstance, method: string, path: string, consumes: string[] | undefined, jsonSchema: unknown) => OpenAPIV3.RequestBodyObject
-  transformResponse: (this: FastifyInstance, method: string, path: string, produces: string[] | undefined, jsonSchema: unknown) => OpenAPIV3.ResponsesObject
+  isRouteBelongTo: IsRouteBelongToFunc
+  mergeDocument: MergeDocumentFunc
+  prepareFullDocument: PrepareFullDocumentFunc
+  transformPath: TransformPathFunc
+  transformQuery: TransformQueryFunc
+  transformParam: TransformParamFunc
+  transformHeader: TransformHeaderFunc
+  transformCookie: TransformCookieFunc
+  transformBody: TransformBodyFunc
+  transformResponse: TransformResponseFunc
+}
+
+function isRouteBelongTo (_routeOptions: RouteOptions): string {
+  // we return default only
+  return 'default'
 }
 
 /**
@@ -30,6 +49,9 @@ export function validateTransformOption (options: OpenAPIPluginOptions): Transfo
     transform = OpenAPIPreset
   }
 
+  if (typeof options.isRouteBelongTo !== 'function') transform.isRouteBelongTo = isRouteBelongTo
+  else transform.isRouteBelongTo = options.isRouteBelongTo
+  if (typeof options.mergeDocument !== 'function') transform.isRouteBelongTo = OpenAPIPreset.mergeDocument
   // we allow to override the each transform from the preset
   if (typeof options.prepareFullDocument === 'function') transform.prepareFullDocument = options.prepareFullDocument
   if (typeof options.transformPath === 'function') transform.transformPath = options.transformPath

@@ -1,9 +1,11 @@
-import { FastifyInstance, RouteOptions } from 'fastify'
-import { convertJSONSchemaToParameterArray, ParameterSchema } from '../utils/transform'
+import deepMerge from 'deepmerge'
+import { FastifyInstance } from 'fastify'
+import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types'
+import { PrepareFullDocumentFunc, TransformBodyFunc, TransformCookieFunc, TransformHeaderFunc, TransformParamFunc, TransformPathFunc, TransformQueryFunc, TransformResponseFunc } from '../utils/options'
+import { convertJSONSchemaToParameterArray } from '../utils/transform'
 
-export function prepareFullDocument (this: FastifyInstance, bucket: Map<{ method: string, path: string }, any[]>): any {
-  const options = this.openapi.document
-  const document: any = {
+export function mergeDocument (this: FastifyInstance, _name: string, base: Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>, document: Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>): Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document> {
+  const dummy: any = {
     openapi: '3.0.3',
     info: {
       version: '0.0.0',
@@ -12,24 +14,18 @@ export function prepareFullDocument (this: FastifyInstance, bucket: Map<{ method
     paths: {}
   }
 
+  return deepMerge.all([dummy, base, document])
+}
+
+export const prepareFullDocument: PrepareFullDocumentFunc = function (_name, document: any, bucket) {
   for (const [key, value] of bucket.entries()) {
     if (document.paths[key.path] === undefined) document.paths[key.path] = {}
     document.paths[key.path][key.method.toLowerCase()] = value[0]
   }
-
-  if (typeof options.openapi !== 'undefined') document.openapi = options.openapi
-  if (typeof options.info !== 'undefined') document.info = { ...document.info, ...options.info }
-  if (typeof options.servers !== 'undefined') document.servers = options.servers
-  if (typeof options.paths !== 'undefined') document.paths = { ...document.info, ...options.paths }
-  if (typeof options.components !== 'undefined') document.components = options.components
-  if (typeof options.security !== 'undefined') document.security = options.security
-  if (typeof options.tags !== 'undefined') document.tags = options.tags
-  if (typeof options.externalDocs !== 'undefined') document.security = options.externalDocs
-
   return document
 }
 
-export function transformPath (this: FastifyInstance, method: string, path: string, options: RouteOptions): any {
+export const transformPath: TransformPathFunc = function (transform, method, path, options) {
   const parameters: any[] = []
   const pathSchema: any = { parameters }
   const schema = options.schema
@@ -43,32 +39,32 @@ export function transformPath (this: FastifyInstance, method: string, path: stri
     if (schema.params !== undefined) {
       const params = convertJSONSchemaToParameterArray(schema.params)
       for (let i = 0; i < params.length; i++) {
-        parameters.push(this.openapi.transform.transformParam.call(this, method, path, params[i]))
+        parameters.push(transform.transformParam(method, path, params[i]))
       }
     }
     if (schema.querystring !== undefined) {
       const queryies = convertJSONSchemaToParameterArray(schema.querystring)
       for (let i = 0; i < queryies.length; i++) {
-        parameters.push(this.openapi.transform.transformQuery.call(this, method, path, queryies[i]))
+        parameters.push(transform.transformQuery(method, path, queryies[i]))
       }
     }
     if (schema.headers !== undefined) {
       const headers = convertJSONSchemaToParameterArray(schema.headers)
       for (let i = 0; i < headers.length; i++) {
-        parameters.push(this.openapi.transform.transformHeader.call(this, method, path, headers[i]))
+        parameters.push(transform.transformHeader(method, path, headers[i]))
       }
     }
     if (schema.cookies !== undefined) {
       const cookies = convertJSONSchemaToParameterArray(schema.cookies)
       for (let i = 0; i < cookies.length; i++) {
-        parameters.push(this.openapi.transform.transformCookie.call(this, method, path, cookies[i]))
+        parameters.push(transform.transformCookie(method, path, cookies[i]))
       }
     }
     if (schema.body !== undefined) {
-      pathSchema.requestBody = this.openapi.transform.transformBody.call(this, method, path, schema.consumes, schema.body)
+      pathSchema.requestBody = transform.transformBody(method, path, schema.consumes, schema.body)
     }
     if (schema.response !== undefined) {
-      pathSchema.responses = this.openapi.transform.transformResponse.call(this, method, path, schema.produces, schema.response)
+      pathSchema.responses = transform.transformResponse(method, path, schema.produces, schema.response)
     }
     if (schema.callbacks !== undefined) pathSchema.callbacks = schema.callbacks
     if (schema.deprecated !== undefined) pathSchema.deprecated = schema.deprecated
@@ -79,7 +75,7 @@ export function transformPath (this: FastifyInstance, method: string, path: stri
   return pathSchema
 }
 
-export function transformQuery (this: FastifyInstance, _method: string, _path: string, schema: ParameterSchema): any {
+export const transformQuery: TransformQueryFunc = function (_method, _path, schema) {
   const o: any = {
     in: 'query',
     name: schema.name,
@@ -94,7 +90,7 @@ export function transformQuery (this: FastifyInstance, _method: string, _path: s
   return o
 }
 
-export function transformParam (this: FastifyInstance, _method: string, _path: string, schema: ParameterSchema): any {
+export const transformParam: TransformParamFunc = function (_method, _path, schema) {
   const o: any = {
     in: 'path',
     name: schema.name,
@@ -109,7 +105,7 @@ export function transformParam (this: FastifyInstance, _method: string, _path: s
   return o
 }
 
-export function transformHeader (this: FastifyInstance, _method: string, _path: string, schema: ParameterSchema): any {
+export const transformHeader: TransformHeaderFunc = function (_method, _path, schema) {
   const o: any = {
     in: 'header',
     name: schema.name,
@@ -124,7 +120,7 @@ export function transformHeader (this: FastifyInstance, _method: string, _path: 
   return o
 }
 
-export function transformCookie (this: FastifyInstance, _method: string, _path: string, schema: ParameterSchema): any {
+export const transformCookie: TransformCookieFunc = function (_method, _path, schema) {
   const o: any = {
     in: 'cookie',
     name: schema.name,
@@ -139,7 +135,7 @@ export function transformCookie (this: FastifyInstance, _method: string, _path: 
   return o
 }
 
-export function transformBody (this: FastifyInstance, _method: string, _path: string, consumes: string[], schema: any): any {
+export const transformBody: TransformBodyFunc = function (_method, _path, consumes, schema: any) {
   // we ensure consumes at least has `application/json`
   consumes = Array.isArray(consumes) && consumes.length > 0 ? consumes : ['application/json']
   const content: any = {}
@@ -179,7 +175,7 @@ export function transformBody (this: FastifyInstance, _method: string, _path: st
   }
 }
 
-export function transformResponse (this: FastifyInstance, _method: string, _path: string, produces: string[], schema: any): any {
+export const transformResponse: TransformResponseFunc = function (_method, _path, produces, schema: any) {
   // we ensure produces at least has `application/json`
   produces = Array.isArray(produces) && produces.length > 0 ? produces : ['application/json']
   // if no response is provided

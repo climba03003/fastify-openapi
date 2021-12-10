@@ -1,14 +1,20 @@
+import DeepMerge from 'deepmerge'
 import { FastifyPluginAsync } from 'fastify'
 import FastifyPlugin from 'fastify-plugin'
 import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types'
-import { RouteBucket } from './utils/bucket'
 import { addHooks } from './utils/hooks'
 import { TransformOptions, validateTransformOption } from './utils/options'
+import { RouteBucket } from './utils/prepare'
 import { addRoutes, RoutesOptions } from './utils/routes'
 
 export interface OpenAPIPluginOptions extends Partial<TransformOptions>{
+  // base document
   document?: Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>
+  // if you need to use different base document for different role
+  documents: Record<string, Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>>
+  // use which preset to handle the route data
   preset?: string
+  // route options to provide document and ui
   routes?: Partial<RoutesOptions>
 }
 
@@ -17,7 +23,9 @@ declare module 'fastify' {
     openapi: {
       transform: TransformOptions
       bucket: RouteBucket
+      // this is base document passed by users
       document: OpenAPIV3.Document | OpenAPIV3_1.Document
+      documents: Record<string, OpenAPIV3.Document | OpenAPIV3_1.Document>
     }
   }
 
@@ -41,15 +49,26 @@ declare module 'fastify' {
 const OpenAPI: FastifyPluginAsync<OpenAPIPluginOptions> = async function (fastify, options): Promise<void> {
   fastify.decorate('openapi', {
     transform: validateTransformOption(options),
-    document: options.document ?? {}
+    document: options.document ?? {},
+    documents: options.documents ?? {
+      // we provide default as fallback
+      default: {}
+    }
   })
 
-  const routes = {
-    prefix: '/documentation',
-    ui: '/',
-    document: '/openapi.json',
-    ...options.routes ?? {}
-  }
+  const routes = DeepMerge(
+    {
+      prefix: '/documentation',
+      documents: [
+        {
+          name: 'default',
+          ui: '/',
+          document: '/openapi.json'
+        }
+      ]
+    },
+    options.routes ?? {}
+  )
 
   addHooks.call(fastify)
   addRoutes.call(fastify, routes)
