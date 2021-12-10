@@ -200,3 +200,5 @@ export const transformResponse: TransformResponseFunc = function (_method, _path
   }
   return response
 }
+
+export const OpenAPIPreset = { mergeDocument, prepareFullDocument, transformBody, transformCookie, transformHeader, transformParam, transformPath, transformQuery, transformResponse }

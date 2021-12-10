@@ -1,7 +1,7 @@
 import { RouteOptions } from 'fastify'
 import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types'
 import { OpenAPIPluginOptions } from '..'
-import * as OpenAPIPreset from '../presets/openapi'
+import { OpenAPIPreset } from '../presets/openapi'
 import { OperationBucket } from './prepare'
 import { ParameterSchema } from './transform'
 
@@ -40,7 +40,7 @@ function isRouteBelongTo (_routeOptions: RouteOptions): string {
  */
 export function validateTransformOption (options: OpenAPIPluginOptions): TransformOptions {
   // we do not need prototype chain
-  let transform: any = Object.create(null)
+  let transform: Partial<TransformOptions> = Object.create(null)
   // if there is no preset provided, we use `openapi`
   if (typeof options.preset !== 'string') options.preset = 'openapi'
 
@@ -51,7 +51,6 @@ export function validateTransformOption (options: OpenAPIPluginOptions): Transfo
 
   if (typeof options.isRouteBelongTo !== 'function') transform.isRouteBelongTo = isRouteBelongTo
   else transform.isRouteBelongTo = options.isRouteBelongTo
-  if (typeof options.mergeDocument !== 'function') transform.isRouteBelongTo = OpenAPIPreset.mergeDocument
   // we allow to override the each transform from the preset
   if (typeof options.prepareFullDocument === 'function') transform.prepareFullDocument = options.prepareFullDocument
   if (typeof options.transformPath === 'function') transform.transformPath = options.transformPath
@@ -72,5 +71,5 @@ export function validateTransformOption (options: OpenAPIPluginOptions): Transfo
   if (typeof transform.transformBody !== 'function') throw new Error('"transformBody" must be provided')
   if (typeof transform.transformResponse !== 'function') throw new Error('"transformResponse" must be provided')
 
-  return transform
+  return transform as TransformOptions
 }
