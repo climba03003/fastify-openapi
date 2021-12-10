@@ -16,16 +16,19 @@ export function prepareRouteBucket (routes: RouteOptions[], isRouteBelongTo: IsR
 
   for (let i = 0; i < routes.length; i++) {
     const route = routes[i]
-    const name = isRouteBelongTo(route)
+    let names = isRouteBelongTo(route)
+    names = Array.isArray(names) ? names : [names]
     const methods: string[] = Array.isArray(route.method) ? route.method : [route.method]
     // we normalize the url into openapi standard
     const path = normalizePath(route.url)
     for (let j = 0; j < methods.length; j++) {
-      const k = { method: methods[j], path, name }
-      if (bucket.has(k)) {
-        bucket.get(k)?.push(clone(route))
-      } else {
-        bucket.set(k, [clone(route)])
+      for (const name of names) {
+        const k = { method: methods[j], path, name }
+        if (bucket.has(k)) {
+          bucket.get(k)?.push(clone(route))
+        } else {
+          bucket.set(k, [clone(route)])
+        }
       }
     }
   }

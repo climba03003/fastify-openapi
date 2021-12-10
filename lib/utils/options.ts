@@ -5,7 +5,7 @@ import { OpenAPIPreset } from '../presets/openapi'
 import { OperationBucket } from './prepare'
 import { ParameterSchema } from './transform'
 
-export type IsRouteBelongToFunc = (routeOptions: RouteOptions) => string
+export type IsRouteBelongToFunc = (routeOptions: RouteOptions) => string | string[]
 export type MergeDocumentFunc = (name: string, base: Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>, document: Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>) => Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>
 export type PrepareFullDocumentFunc = (name: string, document: Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>, bucket: OperationBucket) => OpenAPIV3.Document
 export type TransformPathFunc = (transform: TransformOptions, method: string, path: string, routeOptions: RouteOptions) => OpenAPIV3.OperationObject
