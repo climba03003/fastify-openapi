@@ -8,6 +8,7 @@
 [![GitHub](https://img.shields.io/github/license/climba03003/fastify-openapi)](https://github.com/climba03003/fastify-openapi)
 
 This plugin provide automatic API documentation feature.
+**This project is relative new and the API structure may change rapidly. Please consider it before using in production.**
 
 ## Install
 

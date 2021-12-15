@@ -46,10 +46,14 @@ export function prepareDocumentBucket (routeBucket: RouteBucket, transforms: Tra
     const operationBucket = documentBucket.get(key.name) as OperationBucket
     const temp = []
     for (let i = 0; i < value.length; i++) {
+      // if hide is true, it should exclude in all document
       if (value[i].schema?.hide === true) continue
+      // if hide is array, it should exclude in the specified document
+      if (Array.isArray(value[i].schema?.hide) && (value[i].schema?.hide as string[])?.includes(key.name)) continue
       temp.push(transforms.transformPath(transforms, key.method, key.path, value[i]))
     }
-    operationBucket.set(key, temp)
+    // only set when the key have route
+    if (temp.length > 0) operationBucket.set(key, temp)
   }
   return documentBucket
 }

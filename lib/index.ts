@@ -30,7 +30,7 @@ declare module 'fastify' {
   }
 
   interface FastifySchema {
-    hide?: boolean
+    hide?: boolean | string[]
     tags?: string[]
     summary?: string
     description?: string

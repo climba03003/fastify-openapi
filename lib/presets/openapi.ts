@@ -1,10 +1,8 @@
 import deepMerge from 'deepmerge'
-import { FastifyInstance } from 'fastify'
-import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types'
-import { PrepareFullDocumentFunc, TransformBodyFunc, TransformCookieFunc, TransformHeaderFunc, TransformParamFunc, TransformPathFunc, TransformQueryFunc, TransformResponseFunc } from '../utils/options'
+import { MergeDocumentFunc, PrepareFullDocumentFunc, TransformBodyFunc, TransformCookieFunc, TransformHeaderFunc, TransformParamFunc, TransformPathFunc, TransformQueryFunc, TransformResponseFunc } from '../utils/options'
 import { convertJSONSchemaToParameterArray } from '../utils/transform'
 
-export function mergeDocument (this: FastifyInstance, _name: string, base: Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>, document: Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>): Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document> {
+export const mergeDocument: MergeDocumentFunc = function (_name, base, document) {
   const dummy: any = {
     openapi: '3.0.3',
     info: {
@@ -28,7 +26,7 @@ export const prepareFullDocument: PrepareFullDocumentFunc = function (_name, doc
 
 export const transformPath: TransformPathFunc = function (transform, method, path, options) {
   const parameters: any[] = []
-  const pathSchema: any = { parameters }
+  const pathSchema: any = { }
   const schema = options.schema
   if (schema !== undefined) {
     // we copy most of the property that do not need to mutate
@@ -64,14 +62,16 @@ export const transformPath: TransformPathFunc = function (transform, method, pat
     if (schema.body !== undefined) {
       pathSchema.requestBody = transform.transformBody(method, path, schema.consumes, schema.body)
     }
-    if (schema.response !== undefined) {
-      pathSchema.responses = transform.transformResponse(method, path, schema.produces, schema.response)
-    }
     if (schema.callbacks !== undefined) pathSchema.callbacks = schema.callbacks
     if (schema.deprecated !== undefined) pathSchema.deprecated = schema.deprecated
     if (schema.security !== undefined) pathSchema.security = schema.security
     if (schema.servers !== undefined) pathSchema.servers = schema.servers
   }
+
+  // only add parameters when it exist
+  if (parameters.length > 0) pathSchema.parameters = parameters
+  // response must exist
+  pathSchema.responses = transform.transformResponse(method, path, schema?.produces, schema?.response)
 
   return pathSchema
 }
