@@ -24,7 +24,7 @@ export const prepareFullDocument: PrepareFullDocumentFunc = function (_name, doc
   return document
 }
 
-export const transformPath: TransformPathFunc = function (transform, method, path, options) {
+export const transformPath: TransformPathFunc = function (transform, method, path, options, securityIgnore) {
   const parameters: any[] = []
   const pathSchema: any = { }
   const schema = options.schema
@@ -44,18 +44,21 @@ export const transformPath: TransformPathFunc = function (transform, method, pat
     if (schema.querystring !== undefined) {
       const queryies = convertJSONSchemaToParameterArray(schema.querystring)
       for (let i = 0; i < queryies.length; i++) {
+        if (securityIgnore.query?.includes(queryies[i].name)) continue
         parameters.push(transform.transformQuery(method, path, queryies[i]))
       }
     }
     if (schema.headers !== undefined) {
       const headers = convertJSONSchemaToParameterArray(schema.headers)
       for (let i = 0; i < headers.length; i++) {
+        if (securityIgnore.header?.includes(headers[i].name)) continue
         parameters.push(transform.transformHeader(method, path, headers[i]))
       }
     }
     if (schema.cookies !== undefined) {
       const cookies = convertJSONSchemaToParameterArray(schema.cookies)
       for (let i = 0; i < cookies.length; i++) {
+        if (securityIgnore.cookie?.includes(cookies[i].name)) continue
         parameters.push(transform.transformCookie(method, path, cookies[i]))
       }
     }

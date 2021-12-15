@@ -155,7 +155,8 @@ type TransformPathFunc = (
   transform: TransformOptions, 
   method: string, 
   path: string, 
-  routeOptions: RouteOptions
+  routeOptions: RouteOptions,
+  securityIgnore: Record<string, string[]>
 ) => OpenAPIV3.OperationObject
 
 type TransformQueryFunc =(

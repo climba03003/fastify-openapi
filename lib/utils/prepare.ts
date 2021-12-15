@@ -1,7 +1,7 @@
 import { RouteOptions } from 'fastify'
 import { OpenAPIV3 } from 'openapi-types'
 import RFDC from 'rfdc'
-import { IsRouteBelongToFunc, TransformOptions } from './options'
+import { IsRouteBelongToFunc } from './options'
 import { normalizePath } from './path'
 
 // we clone the route options to prevent, unexpect mutation
@@ -39,18 +39,18 @@ export function prepareRouteBucket (routes: RouteOptions[], isRouteBelongTo: IsR
 export type OperationBucket = Map<RouteBucketKey, OpenAPIV3.OperationObject[]>
 export type DocumentBucket = Map<string, OperationBucket>
 
-export function prepareDocumentBucket (routeBucket: RouteBucket, transforms: TransformOptions): DocumentBucket {
+export function prepareDocumentBucket (routeBucket: RouteBucket): DocumentBucket {
   const documentBucket: DocumentBucket = new Map()
   for (const [key, value] of routeBucket.entries()) {
     if (!documentBucket.has(key.name)) documentBucket.set(key.name, new Map())
-    const operationBucket = documentBucket.get(key.name) as OperationBucket
+    const operationBucket = documentBucket.get(key.name) as Map<RouteBucketKey, unknown[]>
     const temp = []
     for (let i = 0; i < value.length; i++) {
       // if hide is true, it should exclude in all document
       if (value[i].schema?.hide === true) continue
       // if hide is array, it should exclude in the specified document
       if (Array.isArray(value[i].schema?.hide) && (value[i].schema?.hide as string[])?.includes(key.name)) continue
-      temp.push(transforms.transformPath(transforms, key.method, key.path, value[i]))
+      temp.push(value[i])
     }
     // only set when the key have route
     if (temp.length > 0) operationBucket.set(key, temp)
