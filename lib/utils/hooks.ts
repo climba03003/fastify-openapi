@@ -18,7 +18,7 @@ export function addHooks (this: FastifyInstance): void {
   /**
    * 2. we start prepare the json doc for openapi
    */
-  this.addHook('onReady', function () {
+  this.addHook('onReady', async function () {
     this.openapi.bucket = prepareRouteBucket(routes, this.openapi.transform.isRouteBelongTo)
     const documentBucket = prepareDocumentBucket(this.openapi.bucket)
 

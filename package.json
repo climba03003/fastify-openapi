@@ -22,7 +22,8 @@
     "unit": "tap \"test/**/*.test.ts\"",
     "test": "npm run lint && npm run unit",
     "coverage": "tap --coverage --coverage-report=lcovonly",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "postpublish": "npm run clean"
   },
   "publishConfig": {
     "access": "public",
