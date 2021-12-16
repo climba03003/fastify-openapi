@@ -184,25 +184,25 @@ export const transformResponse: TransformResponseFunc = function (_method, _path
   produces = Array.isArray(produces) && produces.length > 0 ? produces : ['application/json']
   // if no response is provided
   if (typeof schema !== 'object') return { 200: { description: 'Default Response' } }
-  const response: any = {
-    description: schema['x-description']
-  }
+  const responses: any = {}
   const statusCodes = Object.keys(schema)
   for (let statusCode of statusCodes) {
     const subSchema = schema[statusCode]
     // if the status code is not `default`, we need to be upper-case
     if (statusCode !== 'default') statusCode = statusCode.toUpperCase()
-    response[statusCode] = {
+    responses[statusCode] = {
       description: subSchema['x-description'] ?? subSchema.description ?? `${statusCode} Response`,
-      headers: subSchema['x-headers'] ?? {},
-      content: {},
-      links: subSchema['x-links'] ?? {}
+      content: {}
     }
+    // object property should be added when it exist only
+    if (typeof subSchema['x-headers'] === 'object') responses[statusCode].headers = subSchema['x-headers']
+    if (typeof subSchema['x-links'] === 'object') responses[statusCode].links = subSchema['x-links']
+
     for (const produce of produces) {
-      response[statusCode].content[produce] = { schema: subSchema }
+      responses[statusCode].content[produce] = { schema: subSchema }
     }
   }
-  return response
+  return responses
 }
 
 export const OpenAPIPreset = { mergeDocument, prepareFullDocument, transformBody, transformCookie, transformHeader, transformParam, transformPath, transformQuery, transformResponse }
