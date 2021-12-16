@@ -7,12 +7,14 @@ export default [
       { dir: 'lib', format: 'cjs', sourcemap: true },
     ],
     plugins: [TypeScript({ module: 'ESNext', outDir: 'lib', include: ['lib/**/*'] })],
+    external: ['deepmerge', 'fastify-plugin', 'rfdc'],
   },
   {
     input: 'lib/index.ts',
     output: [
       { dir: 'lib/mjs', format: 'esm', sourcemap: true },
     ],
-    plugins: [TypeScript({ module: 'ESNext', outDir: 'lib/mjs', include: ['lib/**/*'] })]
+    plugins: [TypeScript({ module: 'ESNext', outDir: 'lib/mjs', include: ['lib/**/*'] })],
+    external: ['deepmerge', 'fastify-plugin', 'rfdc'],
   },
 ]
