@@ -7,6 +7,16 @@ import { TransformOptions, validateTransformOption } from './utils/options'
 import { RouteBucket } from './utils/prepare'
 import { addRoutes, RoutesOptions } from './utils/routes'
 
+declare module 'openapi-types' {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace OpenAPIV3 {
+    interface Document {
+      // we allow `x-` prefix extension
+      [extension: `x-${string}`]: any
+    }
+  }
+}
+
 export interface OpenAPIPluginOptions extends Partial<TransformOptions>{
   // base document
   document?: Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>
@@ -43,6 +53,8 @@ declare module 'fastify' {
     deprecated?: boolean
     security?: Array<{ [securityLabel: string]: string[] }>
     servers?: OpenAPIV3.ServerObject[]
+    // we allow any `x-` prefix extension
+    [extension: `x-${string}`]: any
   }
 }
 

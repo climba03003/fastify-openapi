@@ -31,6 +31,7 @@ export interface ParameterSchema {
   schema: Record<string, unknown>
   required: boolean
   expand: Record<string, unknown>
+  consumes: string[]
 }
 
 export function convertJSONSchemaToParameterArray (schema: any): ParameterSchema[] {
@@ -44,7 +45,8 @@ export function convertJSONSchemaToParameterArray (schema: any): ParameterSchema
       schema: flatten.properties[name],
       required: required.includes(name),
       // we use 'x-expand' for additional options in parameter
-      expand: flatten.properties[name]['x-expand'] ?? {}
+      expand: flatten.properties[name]['x-expand'] ?? {},
+      consumes: flatten.properties[name]['x-consumes'] ?? []
     })
   }
 

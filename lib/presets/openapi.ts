@@ -69,6 +69,10 @@ export const transformPath: TransformPathFunc = function (transform, method, pat
     if (schema.deprecated !== undefined) pathSchema.deprecated = schema.deprecated
     if (schema.security !== undefined) pathSchema.security = schema.security
     if (schema.servers !== undefined) pathSchema.servers = schema.servers
+    // allow `x-` prefix extension
+    for (const key of Object.keys(schema)) {
+      if (key.startsWith('x-')) { pathSchema[key] = (schema as any)[key] }
+    }
   }
 
   // only add parameters when it exist
@@ -84,12 +88,20 @@ export const transformQuery: TransformQueryFunc = function (_method, _path, sche
     in: 'query',
     name: schema.name,
     required: schema.required,
-    schema: schema.schema,
     ...schema.expand
   }
   if (typeof schema.schema.description === 'string') {
-    schema.schema.description = undefined
     o.description = schema.schema.description
+    schema.schema.description = undefined
+  }
+  // when consumes exist, we put the schema inside content
+  if (schema.consumes.length > 0) {
+    o.content = {}
+    for (const consume of schema.consumes) {
+      o.content[consume] = { schema: schema.schema }
+    }
+  } else {
+    o.schema = schema.schema
   }
   return o
 }
@@ -99,12 +111,20 @@ export const transformParam: TransformParamFunc = function (_method, _path, sche
     in: 'path',
     name: schema.name,
     required: true,
-    schema: schema.schema,
     ...schema.expand
   }
   if (typeof schema.schema.description === 'string') {
-    schema.schema.description = undefined
     o.description = schema.schema.description
+    schema.schema.description = undefined
+  }
+  // when consumes exist, we put the schema inside content
+  if (schema.consumes.length > 0) {
+    o.content = {}
+    for (const consume of schema.consumes) {
+      o.content[consume] = { schema: schema.schema }
+    }
+  } else {
+    o.schema = schema.schema
   }
   return o
 }
@@ -114,12 +134,20 @@ export const transformHeader: TransformHeaderFunc = function (_method, _path, sc
     in: 'header',
     name: schema.name,
     required: schema.required,
-    schema: schema.schema,
     ...schema.expand
   }
   if (typeof schema.schema.description === 'string') {
-    schema.schema.description = undefined
     o.description = schema.schema.description
+    schema.schema.description = undefined
+  }
+  // when consumes exist, we put the schema inside content
+  if (schema.consumes.length > 0) {
+    o.content = {}
+    for (const consume of schema.consumes) {
+      o.content[consume] = { schema: schema.schema }
+    }
+  } else {
+    o.schema = schema.schema
   }
   return o
 }
@@ -129,12 +157,20 @@ export const transformCookie: TransformCookieFunc = function (_method, _path, sc
     in: 'cookie',
     name: schema.name,
     required: schema.required,
-    schema: schema.schema,
     ...schema.expand
   }
   if (typeof schema.schema.description === 'string') {
-    schema.schema.description = undefined
     o.description = schema.schema.description
+    schema.schema.description = undefined
+  }
+  // when consumes exist, we put the schema inside content
+  if (schema.consumes.length > 0) {
+    o.content = {}
+    for (const consume of schema.consumes) {
+      o.content[consume] = { schema: schema.schema }
+    }
+  } else {
+    o.schema = schema.schema
   }
   return o
 }
