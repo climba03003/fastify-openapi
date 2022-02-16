@@ -58,3 +58,52 @@ t.test('oneOf, anyOf, allOf', async function (t) {
   const o = validate(fastify.openapi.documents.default)
   t.equal(o, true)
 })
+
+t.test('typebox enum', async function (t) {
+  t.plan(1)
+  const fastify = Fastify()
+  fastify.register(FastifyOpenAPI, {
+    preset: 'openapi',
+    document: baseDocument
+  })
+  const body = {
+    type: 'object',
+    properties: {
+      enum: {
+        type: 'string',
+        anyOf: [
+          {
+            type: 'string',
+            const: 'A'
+          },
+          {
+            type: 'string',
+            const: 'B'
+          }
+        ]
+      }
+    }
+  }
+  fastify.get('/', {
+    schema: {
+      body,
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            success: {
+              type: 'boolean'
+            },
+            items: {
+              type: 'array',
+              items: body
+            }
+          }
+        }
+      }
+    }
+  }, noop)
+  await fastify.ready()
+  const o = validate(fastify.openapi.documents.default)
+  t.equal(o, true)
+})

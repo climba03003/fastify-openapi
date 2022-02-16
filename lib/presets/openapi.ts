@@ -2,6 +2,45 @@ import deepMerge from 'deepmerge'
 import { MergeDocumentFunc, PrepareFullDocumentFunc, TransformBodyFunc, TransformCookieFunc, TransformHeaderFunc, TransformParamFunc, TransformPathFunc, TransformQueryFunc, TransformResponseFunc } from '../utils/options'
 import { convertJSONSchemaToParameterArray } from '../utils/transform'
 
+function hotfix (schema: any, k?: string): any {
+  // we loop through array of allOf, anyOf and oneOf first
+  if ('allOf' in schema) {
+    schema.allOf = schema.allOf.map((o: any) => hotfix(o))
+  }
+  if ('anyOf' in schema) {
+    schema.anyOf = schema.anyOf.map((o: any) => hotfix(o))
+  }
+  if ('oneOf' in schema) {
+    schema.oneOf = schema.oneOf.map((o: any) => hotfix(o))
+  }
+  // it is a normal object
+  // we loop through key-value
+  if (schema.type === 'object' && 'properties' in schema) {
+    Object.keys(schema.properties).forEach(function (key) {
+      schema.properties[key] = hotfix(schema.properties[key], key)
+    })
+  }
+  // it is a normal array
+  // we loop through value
+  if (schema.type === 'array' && 'items' in schema) {
+    schema.items = hotfix(schema.items)
+  }
+  typeboxEnumHotfix(schema, k)
+  return schema
+}
+
+function typeboxEnumHotfix (schema: any, key?: string): any {
+  // it is a object with properties
+  if (schema.type === 'string' && 'anyOf' in schema) {
+    schema.title = key ?? 'Enum'
+    schema.enum = []
+    schema.anyOf.forEach(function (o: any) {
+      schema.enum.push(o.const)
+    })
+    delete schema.anyOf
+  }
+}
+
 export const mergeDocument: MergeDocumentFunc = function (_name, base, document) {
   const dummy: any = {
     openapi: '3.0.3',
@@ -176,6 +215,7 @@ export const transformCookie: TransformCookieFunc = function (_method, _path, sc
 }
 
 export const transformBody: TransformBodyFunc = function (_method, _path, consumes, schema: any) {
+  schema = hotfix(schema)
   // we ensure consumes at least has `application/json`
   consumes = Array.isArray(consumes) && consumes.length > 0 ? consumes : ['application/json']
   const content: any = {}
@@ -223,7 +263,7 @@ export const transformResponse: TransformResponseFunc = function (_method, _path
   const responses: any = {}
   const statusCodes = Object.keys(schema)
   for (let statusCode of statusCodes) {
-    const subSchema = schema[statusCode]
+    const subSchema = hotfix(schema[statusCode])
     // if the status code is not `default`, we need to be upper-case
     if (statusCode !== 'default') statusCode = statusCode.toUpperCase()
     responses[statusCode] = {
