@@ -5,9 +5,16 @@ import { DocumentGeneratorPlugin } from '../document-generator'
 import { OpenAPIPlugin } from '../plugins/openapi'
 import { routeBelongTo, RouteBelongToFunc } from './hooks'
 
+interface DocumentRouteOption {
+  ui: string | false
+  document: string | false
+  uiRouteOption?: RouteShorthandOptions
+  documentRouteOption?: RouteShorthandOptions
+}
+
 export interface RoutesOptions {
   prefix: string
-  documents: Record<string, { ui: string, document: string, uiRouteOption?: RouteShorthandOptions, documentRouteOption?: RouteShorthandOptions }>
+  documents: Record<string, DocumentRouteOption | false>
 }
 
 export interface OpenAPIPluginOptions {

@@ -4,7 +4,8 @@ import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types'
 import { DocumentGenerator } from './document-generator'
 import { kDocumentGenerator } from './symbols'
 import { addHooks } from './utils/fastify-hooks'
-import { normalizePluginOption, OpenAPIPluginOptions } from './utils/options'
+import { addRoutes } from './utils/fastify-routes'
+import { normalizePluginOption, OpenAPIPluginOptions, RoutesOptions } from './utils/options'
 
 declare module 'openapi-types' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -80,6 +81,7 @@ const OpenAPI: FastifyPluginAsync<OpenAPIPluginOptions> = async function (fastif
   fastify.decorate('openapi', openapi)
 
   addHooks(fastify)
+  addRoutes(fastify, opts.routes as RoutesOptions)
 }
 
 export const FastifyOpenAPI = FastifyPlugin(OpenAPI, {
