@@ -1,6 +1,6 @@
 import { FastifyPluginAsync } from 'fastify'
 import FastifyPlugin from 'fastify-plugin'
-import { OpenAPIV3 } from 'openapi-types'
+import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types'
 import { DocumentGenerator } from './document-generator'
 import { kDocumentGenerator } from './symbols'
 import { addHooks } from './utils/fastify-hooks'
@@ -36,8 +36,9 @@ declare module 'fastify' {
   }
 
   interface FastifyInstance {
-    document: {
+    openapi: {
       generate: () => void
+      documents: Record<string, OpenAPIV3.Document | OpenAPIV3_1.Document>
     }
   }
 }
@@ -56,11 +57,27 @@ const OpenAPI: FastifyPluginAsync<OpenAPIPluginOptions> = async function (fastif
     fastify[kDocumentGenerator].plugin(plugin)
   }
 
-  fastify.decorate('document', {
-    generate () {
-      fastify[kDocumentGenerator].generate()
+  const openapi = {}
+  let isGenerated = false
+  Object.defineProperties(openapi, {
+    generate: {
+      value () {
+        fastify[kDocumentGenerator].generate()
+      }
+    },
+    documents: {
+      get () {
+        // lazy load documents
+        if (!isGenerated) {
+          fastify[kDocumentGenerator].generate()
+          isGenerated = true
+        }
+        return fastify[kDocumentGenerator].documents
+      }
     }
   })
+
+  fastify.decorate('openapi', openapi)
 
   addHooks(fastify)
 }
@@ -71,4 +88,7 @@ export const FastifyOpenAPI = FastifyPlugin(OpenAPI, {
   dependencies: []
 })
 export default FastifyOpenAPI
+
+// export plugins
 export { OpenAPIPlugin } from './plugins/openapi'
+export { TypeboxPlugin } from './plugins/typebox'

@@ -17,25 +17,29 @@ export const OpenAPIPlugin: DocumentGeneratorPlugin = function (instance) {
       if (schema.params !== undefined) {
         const params = convertJSONSchemaToParameterArray(that, that.runHook('onTransform', schema.params, { method, path, position: 'param' }))
         for (let i = 0; i < params.length; i++) {
-          parameters.push(that.runHook('onParam', params[i], { method, path, securityIngore }))
+          const o = that.runHook('onParam', params[i], { method, path, securityIngore })
+          if (o !== undefined) parameters.push(o)
         }
       }
       if (schema.querystring !== undefined) {
         const querystring = convertJSONSchemaToParameterArray(that, that.runHook('onTransform', schema.querystring, { method, path, position: 'querystring' }))
         for (let i = 0; i < querystring.length; i++) {
-          parameters.push(that.runHook('onQuery', querystring[i], { method, path, securityIngore }))
+          const o = that.runHook('onQuery', querystring[i], { method, path, securityIngore })
+          if (o !== undefined) parameters.push(o)
         }
       }
       if (schema.headers !== undefined) {
         const headers = convertJSONSchemaToParameterArray(that, that.runHook('onTransform', schema.headers, { method, path, position: 'header' }))
         for (let i = 0; i < headers.length; i++) {
-          parameters.push(that.runHook('onHeader', headers[i], { method, path, securityIngore }))
+          const o = that.runHook('onHeader', headers[i], { method, path, securityIngore })
+          if (o !== undefined) parameters.push(o)
         }
       }
       if (schema.cookies !== undefined) {
         const cookies = convertJSONSchemaToParameterArray(that, that.runHook('onTransform', schema.cookies, { method, path, position: 'cookie' }))
         for (let i = 0; i < cookies.length; i++) {
-          parameters.push(that.runHook('onCookie', cookies[i], { method, path, securityIngore }))
+          const o = that.runHook('onCookie', cookies[i], { method, path, securityIngore })
+          if (o !== undefined) parameters.push(o)
         }
       }
       if (schema.body !== undefined) {
@@ -59,7 +63,8 @@ export const OpenAPIPlugin: DocumentGeneratorPlugin = function (instance) {
     return pathSchema
   })
 
-  instance.addHook('onQuery', function (_, schema) {
+  instance.addHook('onQuery', function (_, schema, _oSchema, { securityIngore }) {
+    if (securityIngore.query?.includes(schema.name)) return
     const o: any = {
       in: 'query',
       name: schema.name,
@@ -82,7 +87,8 @@ export const OpenAPIPlugin: DocumentGeneratorPlugin = function (instance) {
     return o
   })
 
-  instance.addHook('onParam', function (_, schema) {
+  instance.addHook('onParam', function (_, schema, _oSchema, { securityIngore }) {
+    if (securityIngore.path?.includes(schema.name)) return
     const o: any = {
       in: 'path',
       name: schema.name,
@@ -105,7 +111,8 @@ export const OpenAPIPlugin: DocumentGeneratorPlugin = function (instance) {
     return o
   })
 
-  instance.addHook('onHeader', function (_, schema) {
+  instance.addHook('onHeader', function (_, schema, _oSchema, { securityIngore }) {
+    if (securityIngore.header?.includes(schema.name)) return
     const o: any = {
       in: 'header',
       name: schema.name,
@@ -127,7 +134,8 @@ export const OpenAPIPlugin: DocumentGeneratorPlugin = function (instance) {
     }
     return o
   })
-  instance.addHook('onCookie', function (_, schema) {
+  instance.addHook('onCookie', function (_, schema, _oSchema, { securityIngore }) {
+    if (securityIngore.cookie?.includes(schema.name)) return
     const o: any = {
       in: 'cookie',
       name: schema.name,
