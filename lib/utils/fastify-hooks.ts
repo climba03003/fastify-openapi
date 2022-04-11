@@ -20,14 +20,13 @@ export function addHooks (fastify: FastifyInstance): void {
     done()
   })
 
-  fastify.addHook('onRegister', function (instance, done) {
+  fastify.addHook('onRegister', function (instance, _, done) {
     // since each instance may have their own $ref storage
     // we need it for each registration
     instance.addHook('onReady', function (done) {
       fastify[kDocumentGenerator].addSchemas(fastify.getSchemas())
       done()
     })
-
     done()
   })
 
