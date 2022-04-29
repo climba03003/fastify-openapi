@@ -10,7 +10,7 @@ export function addRoutes (this: FastifyInstance, options: RoutesOptions): void 
   for (const [name, { ui, document, uiRouteOption, documentRouteOption }] of Object.entries(options.documents)) {
     this.get(
       options.prefix + document,
-      DeepMerge({ schema: { hide: true } }, uiRouteOption ?? {}),
+      DeepMerge({ schema: { hide: true } }, documentRouteOption ?? {}),
       async (_, reply) => {
         return await reply.send(this.openapi.documents[name])
       }
@@ -22,11 +22,16 @@ export function addRoutes (this: FastifyInstance, options: RoutesOptions): void 
         {
           schema: { hide: true },
           onSend (_request, reply, _payload, done) {
+            /**
+             * coep is need, since helmet provide a stricter rules - require-corp
+             * and unpkg.com do not provide a corp header
+             */
+            void reply.header('cross-origin-embedder-policy', 'unsafe-none')
             void reply.header('content-security-policy', "default-src 'self'; img-src 'self'; child-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' unpkg.com; style-src 'unsafe-inline' unpkg.com")
             done()
           }
         },
-        documentRouteOption ?? {}
+        uiRouteOption ?? {}
       ),
       async (_, reply) => {
         return await reply.header('content-type', 'text/html').send(`
