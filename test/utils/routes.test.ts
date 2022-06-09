@@ -15,7 +15,7 @@ function noop (): void {}
 t.test('default document', async function (t) {
   t.plan(5)
   const fastify = Fastify()
-  fastify.register(FastifyOpenAPI, {
+  await fastify.register(FastifyOpenAPI, {
     preset: 'openapi',
     document: baseDocument
   })
@@ -43,7 +43,7 @@ t.test('multi document', async function (t) {
   t.plan(12)
   let i = 0
   const fastify = Fastify()
-  fastify.register(FastifyOpenAPI, {
+  await fastify.register(FastifyOpenAPI, {
     preset: 'openapi',
     document: baseDocument,
     routes: {

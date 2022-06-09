@@ -38,7 +38,7 @@ Cons
 ```ts
 import FastifyOpenAPI from '@kakang/fastify-openapi'
 
-fastify.register(FastifyOpenAPI, {
+fastifawait fastify.register(FastifyOpenAPI
   // preset only support `openapi` currently
   preset: 'openapi',
   // base document shared for multiple document

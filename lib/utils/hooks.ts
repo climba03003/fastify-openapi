@@ -12,6 +12,7 @@ export function addHooks (this: FastifyInstance): void {
    *    route, we wait until all the thing is done.
    */
   this.addHook('onRoute', function (route) {
+    if (route.method === 'HEAD') return
     routes.push(route)
   })
 

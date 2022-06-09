@@ -14,7 +14,7 @@ function noop (): void {}
 t.test('oneOf, anyOf, allOf', async function (t) {
   t.plan(1)
   const fastify = Fastify()
-  fastify.register(FastifyOpenAPI, {
+  await fastify.register(FastifyOpenAPI, {
     preset: 'openapi',
     document: baseDocument
   })
@@ -62,7 +62,7 @@ t.test('oneOf, anyOf, allOf', async function (t) {
 t.test('typebox enum', async function (t) {
   t.plan(1)
   const fastify = Fastify()
-  fastify.register(FastifyOpenAPI, {
+  await fastify.register(FastifyOpenAPI, {
     preset: 'openapi',
     document: baseDocument
   })
@@ -84,7 +84,7 @@ t.test('typebox enum', async function (t) {
       }
     }
   }
-  fastify.get('/', {
+  fastify.post('/', {
     schema: {
       body,
       response: {

@@ -14,7 +14,7 @@ function noop (): void {}
 t.test('$ref is not supported', async function (t) {
   t.plan(1)
   const fastify = Fastify()
-  fastify.register(FastifyOpenAPI, {
+  await fastify.register(FastifyOpenAPI, {
     preset: 'openapi',
     document: baseDocument
   })
@@ -36,7 +36,7 @@ t.test('$ref is not supported', async function (t) {
 t.test('array schema is not supported', async function (t) {
   t.plan(1)
   const fastify = Fastify()
-  fastify.register(FastifyOpenAPI, {
+  await fastify.register(FastifyOpenAPI, {
     preset: 'openapi',
     document: baseDocument
   })

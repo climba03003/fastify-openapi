@@ -15,7 +15,7 @@ function noop (): void {}
 t.test('normal schema', async function (t) {
   t.plan(1)
   const fastify = Fastify()
-  fastify.register(FastifyOpenAPI, {
+  await fastify.register(FastifyOpenAPI, {
     preset: 'openapi',
     document: baseDocument
   })
@@ -35,7 +35,7 @@ t.test('normal schema', async function (t) {
 t.test('deprecated', async function (t) {
   t.plan(3)
   const fastify = Fastify()
-  fastify.register(FastifyOpenAPI, {
+  await fastify.register(FastifyOpenAPI, {
     preset: 'openapi',
     document: baseDocument
   })
@@ -56,7 +56,7 @@ t.test('deprecated', async function (t) {
 t.test('meta data', async function (t) {
   t.plan(9)
   const fastify = Fastify()
-  fastify.register(FastifyOpenAPI, {
+  await fastify.register(FastifyOpenAPI, {
     preset: 'openapi',
     document: baseDocument
   })
@@ -104,7 +104,7 @@ t.test('meta data', async function (t) {
 t.test('consumes', async function (t) {
   t.plan(3)
   const fastify = Fastify()
-  fastify.register(FastifyOpenAPI, {
+  await fastify.register(FastifyOpenAPI, {
     preset: 'openapi',
     document: baseDocument
   })
@@ -139,7 +139,7 @@ t.test('consumes', async function (t) {
 t.test('produces', async function (t) {
   t.plan(3)
   const fastify = Fastify()
-  fastify.register(FastifyOpenAPI, {
+  await fastify.register(FastifyOpenAPI, {
     preset: 'openapi',
     document: baseDocument
   })
@@ -167,7 +167,7 @@ t.test('produces', async function (t) {
 t.test('cookies', async function (t) {
   t.plan(3)
   const fastify = Fastify()
-  fastify.register(FastifyOpenAPI, {
+  await fastify.register(FastifyOpenAPI, {
     preset: 'openapi',
     document: baseDocument
   })
@@ -201,7 +201,7 @@ t.test('cookies', async function (t) {
 t.test('extension', async function (t) {
   t.plan(4)
   const fastify = Fastify()
-  fastify.register(FastifyOpenAPI, {
+  await fastify.register(FastifyOpenAPI, {
     preset: 'openapi',
     document: baseDocument,
     documents: { default: { 'x-ternal': true } }
@@ -221,7 +221,7 @@ t.test('extension', async function (t) {
 t.test('multiple methods', async function (t) {
   t.plan(3)
   const fastify = Fastify()
-  fastify.register(FastifyOpenAPI, {
+  await fastify.register(FastifyOpenAPI, {
     preset: 'openapi',
     document: baseDocument
   })
@@ -243,7 +243,7 @@ t.test('multiple methods', async function (t) {
 t.test('extension', async function (t) {
   t.plan(4)
   const fastify = Fastify()
-  fastify.register(FastifyOpenAPI, {
+  await fastify.register(FastifyOpenAPI, {
     preset: 'openapi',
     document: baseDocument,
     documents: { default: { 'x-ternal': true } }
@@ -263,7 +263,7 @@ t.test('extension', async function (t) {
 t.test('multiple methods', async function (t) {
   t.plan(3)
   const fastify = Fastify()
-  fastify.register(FastifyOpenAPI, {
+  await fastify.register(FastifyOpenAPI, {
     preset: 'openapi',
     document: baseDocument
   })
@@ -286,7 +286,7 @@ t.test('description in parameters', async function (t) {
   // we must use t.match here, because `undefined` value should not affect the correctness of document
   t.plan(9)
   const fastify = Fastify()
-  fastify.register(FastifyOpenAPI, {
+  await fastify.register(FastifyOpenAPI, {
     preset: 'openapi',
     document: baseDocument
   })
@@ -391,8 +391,16 @@ t.test('description in parameters', async function (t) {
 t.test('content-type in parameters', async function (t) {
   // we must use t.match here, because `undefined` value should not affect the correctness of document
   t.plan(9)
-  const fastify = Fastify()
-  fastify.register(FastifyOpenAPI, {
+  const fastify = Fastify({
+    ajv: {
+      plugins: [
+        function (ajv: any) {
+          ajv.addKeyword('x-consumes')
+        }
+      ]
+    }
+  })
+  await fastify.register(FastifyOpenAPI, {
     preset: 'openapi',
     document: baseDocument
   })
@@ -562,7 +570,7 @@ t.test('response links', async function (t) {
   // we must use t.match here, because `undefined` value should not affect the correctness of document
   t.plan(3)
   const fastify = Fastify()
-  fastify.register(FastifyOpenAPI, {
+  await fastify.register(FastifyOpenAPI, {
     preset: 'openapi',
     document: baseDocument
   })
@@ -639,7 +647,7 @@ t.test('response headers', async function (t) {
   // we must use t.match here, because `undefined` value should not affect the correctness of document
   t.plan(3)
   const fastify = Fastify()
-  fastify.register(FastifyOpenAPI, {
+  await fastify.register(FastifyOpenAPI, {
     preset: 'openapi',
     document: baseDocument
   })
@@ -708,7 +716,7 @@ t.test('should ignore security headers', async function (t) {
   // we must use t.match here, because `undefined` value should not affect the correctness of document
   t.plan(7)
   const fastify = Fastify()
-  fastify.register(FastifyOpenAPI, {
+  await fastify.register(FastifyOpenAPI, {
     preset: 'openapi',
     document: baseDocument
   })
@@ -768,7 +776,7 @@ t.test('should ignore security querystrings', async function (t) {
   // we must use t.match here, because `undefined` value should not affect the correctness of document
   t.plan(7)
   const fastify = Fastify()
-  fastify.register(FastifyOpenAPI, {
+  await fastify.register(FastifyOpenAPI, {
     preset: 'openapi',
     document: baseDocument,
     documents: {
@@ -841,7 +849,7 @@ t.test('should ignore security cookies', async function (t) {
   // we must use t.match here, because `undefined` value should not affect the correctness of document
   t.plan(7)
   const fastify = Fastify()
-  fastify.register(FastifyOpenAPI, {
+  await fastify.register(FastifyOpenAPI, {
     preset: 'openapi',
     document: baseDocument,
     documents: {

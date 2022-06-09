@@ -89,7 +89,7 @@ const OpenAPI: FastifyPluginAsync<OpenAPIPluginOptions> = async function (fastif
 }
 
 export const FastifyOpenAPI = FastifyPlugin(OpenAPI, {
-  fastify: '3.x',
+  fastify: '4.x',
   name: '@kakang/fastify-openapi',
   dependencies: []
 })
