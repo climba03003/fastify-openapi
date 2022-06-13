@@ -15,7 +15,8 @@ const cases = [
   ['/api/v1/postalcode-jp/:code(^[0-9]{7}$)', '/api/v1/postalcode-jp/{code}'],
   ['/api/v1/postalcode-jp/(^[0-9]{7}$)', '/api/v1/postalcode-jp/{regexp1}'],
   // it is rare case, but will exist when people mis-configure
-  ['example', '/example']
+  ['example', '/example'],
+  ['/example/', '/example']
 ]
 
 t.test('formatParamUrl', function (t) {
