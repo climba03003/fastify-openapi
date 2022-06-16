@@ -1,77 +1,60 @@
-import { RouteOptions } from 'fastify'
+import DeepMerge from 'deepmerge'
+import { RouteShorthandOptions } from 'fastify'
 import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types'
-import { OpenAPIPluginOptions } from '..'
-import { OpenAPIPreset } from '../presets/openapi'
-import { OperationBucket } from './prepare'
-import { ParameterSchema } from './transform'
+import { DocumentGeneratorPlugin } from '../document-generator'
+import { OpenAPIPlugin } from '../plugins/openapi'
+import { routeBelongTo, RouteBelongToFunc } from './hooks'
 
-export type IsRouteBelongToFunc = (routeOptions: RouteOptions) => string | string[]
-export type MergeDocumentFunc = (name: string, base?: Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>, document?: Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>) => Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>
-export type PrepareFullDocumentFunc = (name: string, document: Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>, bucket: OperationBucket) => OpenAPIV3.Document
-export type TransformPathFunc = (transform: TransformOptions, method: string, path: string, routeOptions: RouteOptions, securityIgnore: Record<string, string[]>) => OpenAPIV3.OperationObject
-export type TransformQueryFunc =(method: string, path: string, parameterSchema: ParameterSchema) => OpenAPIV3.ParameterObject
-export type TransformParamFunc = (method: string, path: string, parameterSchema: ParameterSchema) => OpenAPIV3.ParameterObject
-export type TransformHeaderFunc = (method: string, path: string, parameterSchema: ParameterSchema) => OpenAPIV3.ParameterObject
-export type TransformCookieFunc = (method: string, path: string, parameterSchema: ParameterSchema) => OpenAPIV3.ParameterObject
-export type TransformBodyFunc = (method: string, path: string, consumes: string[] | undefined, jsonSchema: unknown) => OpenAPIV3.RequestBodyObject
-export type TransformResponseFunc = (method: string, path: string, produces: string[] | undefined, jsonSchema: unknown) => OpenAPIV3.ResponsesObject
-
-export interface TransformOptions {
-  isRouteBelongTo: IsRouteBelongToFunc
-  mergeDocument: MergeDocumentFunc
-  prepareFullDocument: PrepareFullDocumentFunc
-  transformPath: TransformPathFunc
-  transformQuery: TransformQueryFunc
-  transformParam: TransformParamFunc
-  transformHeader: TransformHeaderFunc
-  transformCookie: TransformCookieFunc
-  transformBody: TransformBodyFunc
-  transformResponse: TransformResponseFunc
+interface DocumentRouteOption {
+  ui: string | false
+  document: string | false
+  uiRouteOption?: RouteShorthandOptions
+  documentRouteOption?: RouteShorthandOptions
 }
 
-function isRouteBelongTo (_routeOptions: RouteOptions): string {
-  // we return default only
-  return 'default'
+export interface RoutesOptions {
+  prefix: string
+  documents: Record<string, DocumentRouteOption | false>
 }
 
-/**
- * this functions is used to custom the correct
- * utilities based on user provided options
- */
-export function validateTransformOption (options: OpenAPIPluginOptions): TransformOptions {
-  // we do not need prototype chain
-  let transform: Partial<TransformOptions> = Object.create(null)
-  // if there is no preset provided, we use `openapi`
-  if (typeof options.preset !== 'string') options.preset = 'openapi'
+export interface OpenAPIPluginOptions {
+  // base document
+  document?: Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>
+  // if you need to use different base document for different role
+  documents?: Record<string, Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>>
+  // plugins
+  plugins?: DocumentGeneratorPlugin[]
+  // route options to provide document and ui
+  routes?: Partial<RoutesOptions>
 
-  // if we use `openapi`, we import from our `preset`
-  if (options.preset === 'openapi') {
-    transform = OpenAPIPreset
+  // we allow some global functions to override
+  routeBelongTo?: RouteBelongToFunc
+}
+
+export function normalizePluginOption (options: OpenAPIPluginOptions): Required<OpenAPIPluginOptions> {
+  const opts = {
+    routeBelongTo: options.routeBelongTo ?? routeBelongTo,
+    document: options.document ?? {},
+    documents: DeepMerge(
+      {
+        // we provide default as fallback
+        default: {}
+      },
+      options.documents ?? {}
+    ),
+    plugins: options.plugins ?? [OpenAPIPlugin],
+    routes: DeepMerge(
+      {
+        prefix: '/documentation',
+        documents: {
+          default: {
+            ui: '/',
+            document: '/openapi.json'
+          }
+        }
+      },
+      options.routes ?? {}
+    )
   }
-
-  if (typeof options.isRouteBelongTo !== 'function') transform.isRouteBelongTo = isRouteBelongTo
-  else transform.isRouteBelongTo = options.isRouteBelongTo
-  // we allow to override the each transform from the preset
-  if (typeof options.prepareFullDocument === 'function') transform.prepareFullDocument = options.prepareFullDocument
-  if (typeof options.mergeDocument === 'function') transform.mergeDocument = options.mergeDocument
-  if (typeof options.transformPath === 'function') transform.transformPath = options.transformPath
-  if (typeof options.transformQuery === 'function') transform.transformQuery = options.transformQuery
-  if (typeof options.transformParam === 'function') transform.transformParam = options.transformParam
-  if (typeof options.transformHeader === 'function') transform.transformHeader = options.transformHeader
-  if (typeof options.transformCookie === 'function') transform.transformCookie = options.transformCookie
-  if (typeof options.transformBody === 'function') transform.transformBody = options.transformBody
-  if (typeof options.transformResponse === 'function') transform.transformResponse = options.transformResponse
-
-  // we check if any of those missing
-  if (typeof transform.prepareFullDocument !== 'function') throw new Error('"prepareFullDocument" must be provided')
-  if (typeof transform.mergeDocument !== 'function') throw new Error('"mergeDocument" must be provided')
-  if (typeof transform.transformPath !== 'function') throw new Error('"transformPath" must be provided')
-  if (typeof transform.transformQuery !== 'function') throw new Error('"transformQuery" must be provided')
-  if (typeof transform.transformParam !== 'function') throw new Error('"transformParam" must be provided')
-  if (typeof transform.transformHeader !== 'function') throw new Error('"transformHeader" must be provided')
-  if (typeof transform.transformCookie !== 'function') throw new Error('"transformCookie" must be provided')
-  if (typeof transform.transformBody !== 'function') throw new Error('"transformBody" must be provided')
-  if (typeof transform.transformResponse !== 'function') throw new Error('"transformResponse" must be provided')
-
-  return transform as TransformOptions
+  return opts
 }

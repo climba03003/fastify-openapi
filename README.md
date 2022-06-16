@@ -36,11 +36,11 @@ Cons
 ## Usage
 
 ```ts
-import FastifyOpenAPI from '@kakang/fastify-openapi'
+import { FastifyOpenAPI, OpenAPIPlugin }  from '@kakang/fastify-openapi'
 
-fastifawait fastify.register(FastifyOpenAPI
-  // preset only support `openapi` currently
-  preset: 'openapi',
+fastify.register(FastifyOpenAPI, {
+  // plugin
+  plugins: [ OpenAPIPlugin ],
   // base document shared for multiple document
   // it should follow the format of OpenAPI 3.0
   document: {},
@@ -70,23 +70,9 @@ fastifawait fastify.register(FastifyOpenAPI
     }
   },
   // function to identify which document the route belong to
-  isRouteBelongTo: function() { },
-  // how to make the document
-  prepareFullDocument: function() {},
-  // how to transform route options to openapi operation object
-  transformPath: function() {},
-  // how to transform json-schema to openapi query
-  transformQuery: function() {},
-  // how to transform json-schema to openapi param
-  transformParam: function() {},
-  // how to transform json-schema to openapi header
-  transformHeader: function() {},
-  // how to transform json-schema to openapi cookie
-  transformCookie: function() {},
-  // how to transform json-schema to openapi body
-  transformBody: function() {},
-  // how to transform json-schema to openapi response
-  transformResponse: function() {},
+  routeBelongTo: function() { 
+    return []
+  },
 })
 ```
 
@@ -133,68 +119,108 @@ fastify.get(
 )
 ```
 
-### Transform
+## Hooks
+
+### onPath
+
+On Path hook is executed for generate OpenAPI OperationObject.
 
 ```ts
-type IsRouteBelongToFunc = (
-  routeOptions: RouteOptions
-) => string
+function plugin(instance) {
+  /**
+   * @param {DocumentGenerator} instance document generator
+   * @param {RouteOptions|OperationObject} schema last hook result. If it is the first hook, it is the original schema.
+   * @param {RouteOptions} originalSchema original schema
+   * @param {object} additionalInformation additional information
+   * @returns {OperationObject} operation object
+   **/
+  instance.addHook('onPath', function(instance, schema, originalSchema, additionalInformation) {
+    return schema
+  })
+}
+```
 
-type MergeDocumentFunc = (
-  name: string, 
-  base: Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>,
-  document: Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>
-) => Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>
+### onQuery, onParam, onHeader, onCookie
 
-type PrepareFullDocumentFunc = (
-  name: string, 
-  document: Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>, 
-  bucket: OperationBucket
-) => OpenAPIV3.Document
+On Query, Param, Header and Cookie hook are executed for generate OpenAPI ParameterObject.
 
-type TransformPathFunc = (
-  transform: TransformOptions, 
-  method: string, 
-  path: string, 
-  routeOptions: RouteOptions,
-  securityIgnore: Record<string, string[]>
-) => OpenAPIV3.OperationObject
+```ts
+function plugin(instance) {
+  /**
+   * @param {DocumentGenerator} instance document generator
+   * @param {ParameterSchema|ParameterObject} schema last hook result. If it is the first hook, it is the original schema.
+   * @param {ParameterSchema} originalSchema original schema
+   * @param {object} additionalInformation additional information
+   * @returns {ParameterObject} operation object
+   **/
+  instance.addHook('onQuery', function(instance, schema, originalSchema, additionalInformation) {
+    return schema
+  })
+  instance.addHook('onParam', function(instance, schema, originalSchema, additionalInformation) {
+    return schema
+  })
+  instance.addHook('onHeader', function(instance, schema, originalSchema, additionalInformation) {
+    return schema
+  })
+  instance.addHook('onCookie', function(instance, schema, originalSchema, additionalInformation) {
+    return schema
+  })
+}
+```
 
-type TransformQueryFunc =(
-  method: string, 
-  path: string, 
-  parameterSchema: ParameterSchema
-) => OpenAPIV3.ParameterObject
+### onBody
 
-type TransformParamFunc = (
-  method: string, 
-  path: string, 
-  parameterSchema: ParameterSchema
-) => OpenAPIV3.ParameterObject
+On Body hook is executed for generate OpenAPI RequestBodyObject.
 
-type TransformHeaderFunc = (
-  method: string, 
-  path: string, 
-  parameterSchema: ParameterSchema
-) => OpenAPIV3.ParameterObject
+```ts
+function plugin(instance) {
+  /**
+   * @param {DocumentGenerator} instance document generator
+   * @param {JSONSchema|RequestBodyObject} schema last hook result. If it is the first hook, it is the original schema.
+   * @param {JSONSchema} originalSchema original schema
+   * @param {object} additionalInformation additional information
+   * @returns {RequestBodyObject} operation object
+   **/
+  instance.addHook('onPath', function(instance, schema, originalSchema, additionalInformation) {
+    return schema
+  })
+}
+```
 
-type TransformCookieFunc = (
-  method: string, 
-  path: string, 
-  parameterSchema: ParameterSchema
-) => OpenAPIV3.ParameterObject
+### onResponse
 
-type TransformBodyFunc = (
-  method: string, 
-  path: string, 
-  consumes: string[] | undefined, 
-  jsonSchema: unknown
-) => OpenAPIV3.RequestBodyObject
+On Response hook is executed for generate OpenAPI ResponsesObject.
 
-type TransformResponseFunc = (
-  method: string, 
-  path: string, 
-  produces: string[] | undefined, 
-  jsonSchema: unknown
-) => OpenAPIV3.ResponsesObject
+```ts
+function plugin(instance) {
+  /**
+   * @param {DocumentGenerator} instance document generator
+   * @param {JSONSchema|RequestBodyObject} schema last hook result. If it is the first hook, it is the original schema.
+   * @param {JSONSchema} originalSchema original schema
+   * @param {object} additionalInformation additional information
+   * @returns {ResponsesObject} operation object
+   **/
+  instance.addHook('onResponse', function(instance, schema, originalSchema, additionalInformation) {
+    return schema
+  })
+}
+```
+
+### onTransform
+
+On Transform hook is executed for generate valid schema.
+
+```ts
+function plugin(instance) {
+  /**
+   * @param {DocumentGenerator} instance document generator
+   * @param {unknown} schema last hook result. If it is the first hook, it is the original schema.
+   * @param {unknown} originalSchema original schema
+   * @param {object} additionalInformation additional information
+   * @returns {JSONSchema} operation object
+   **/
+  instance.addHook('onTransform', function(instance, schema, originalSchema, additionalInformation) {
+    return schema
+  })
+}
 ```

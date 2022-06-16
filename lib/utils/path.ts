@@ -69,9 +69,7 @@ export function normalizePath (str: string): string {
           // * -> wildcard
           // should be exist once only
           path += '{wildcard}'
-        } else if (char === '/' && (i + 1) === str.length) {
-          // we skip the last slash
-          // since /example/:param and /example/ will conflict in fastify@4
+        } else if (char === '/' && i === str.length - 1) {
           continue
         } else {
           path += char
