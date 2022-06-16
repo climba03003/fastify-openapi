@@ -24,6 +24,11 @@ export function addRoutes (fastify: FastifyInstance, options: RoutesOptions): vo
           {
             schema: { hide: true },
             onSend (_request, reply, _payload, done) {
+              /**
+               * coep is need, since helmet provide a stricter rules - require-corp
+               * and unpkg.com do not provide a corp header
+               */
+              void reply.header('cross-origin-embedder-policy', 'unsafe-none')
               void reply.header('content-security-policy', "default-src 'self'; img-src 'self'; child-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' unpkg.com; style-src 'unsafe-inline' unpkg.com")
               done()
             }
