@@ -195,7 +195,7 @@ export const OpenAPIPlugin: DocumentGeneratorPlugin = function (instance) {
     }
     return {
       description: schema['x-description'],
-      content: content,
+      content,
       required: schema['x-required']
     }
   })

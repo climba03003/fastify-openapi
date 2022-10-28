@@ -3,7 +3,7 @@ import { OpenAPIV3 } from 'openapi-types'
 export function computeSecurityIgnore (
   documentSecurity?: OpenAPIV3.SecurityRequirementObject[],
   pathSecurity?: OpenAPIV3.SecurityRequirementObject[],
-  securitySchemes?: {[key: string]: OpenAPIV3.ReferenceObject | OpenAPIV3.SecuritySchemeObject}
+  securitySchemes?: { [key: string]: OpenAPIV3.ReferenceObject | OpenAPIV3.SecuritySchemeObject }
 ): Record<string, string[]> {
   const securityIgnore: Record<string, string[]> = Object.create(null)
   const joinedSecurity = ([] as OpenAPIV3.SecurityRequirementObject[]).concat(documentSecurity ?? []).concat(pathSecurity ?? [])
