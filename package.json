@@ -45,7 +45,7 @@
   },
   "devDependencies": {
     "@apidevtools/openapi-schemas": "^2.1.0",
-    "@types/node": "^18.0.0",
+    "@types/node": "^20.1.0",
     "@types/tap": "^15.0.7",
     "@typescript-eslint/eslint-plugin": "^5.41.0",
     "@typescript-eslint/parser": "5.59.2",
