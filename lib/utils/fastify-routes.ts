@@ -1,6 +1,6 @@
 import DeepMerge from 'deepmerge'
-import { FastifyInstance } from 'fastify'
-import { RoutesOptions } from './options'
+import { type FastifyInstance } from 'fastify'
+import { type RoutesOptions } from './options'
 
 export function addRoutes (fastify: FastifyInstance, options: RoutesOptions): void {
   for (const [name, document] of Object.entries(options.documents)) {

@@ -1,8 +1,8 @@
-import { FastifyLoggerInstance, RouteOptions } from 'fastify'
-import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types'
+import { type FastifyBaseLogger, type RouteOptions } from 'fastify'
+import { type OpenAPIV3, type OpenAPIV3_1 } from 'openapi-types'
 import RFDC from 'rfdc'
-import { kDocumentBucket, kDocumentGenerator, kInternal, kRouteBucket } from './symbols'
-import { DocumentGeneratorHookName, mergeDocument, MergeDocumentFunc, OnBodyHookFunc, OnCookieHookFunc, OnHeaderHookFunc, OnParamHookFunc, OnPathHookFunc, OnQueryHookFunc, OnRefResolveHookFunc, OnResponseHookFunc, OnTransformHookFunc, RouteBelongToFunc } from './utils/hooks'
+import { kDocumentBucket, kInternal, kRouteBucket, type kDocumentGenerator } from './symbols'
+import { mergeDocument, type DocumentGeneratorHookName, type MergeDocumentFunc, type OnBodyHookFunc, type OnCookieHookFunc, type OnHeaderHookFunc, type OnParamHookFunc, type OnPathHookFunc, type OnQueryHookFunc, type OnRefResolveHookFunc, type OnResponseHookFunc, type OnTransformHookFunc, type RouteBelongToFunc } from './utils/hooks'
 import { normalizePath } from './utils/path'
 import { computeSecurityIgnore } from './utils/security'
 
@@ -18,7 +18,7 @@ declare module 'fastify' {
 export type DocumentGeneratorPlugin = (generator: DocumentGenerator) => void
 
 export interface DocumentGeneratorOption {
-  log?: FastifyLoggerInstance
+  log?: FastifyBaseLogger
   // base document
   document: Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>
   // if you need to use different base document for different role
@@ -51,7 +51,7 @@ export class DocumentGenerator {
     // used to store all schemas
     schemas: Map<string, any>
     // we accept
-    log: FastifyLoggerInstance
+    log: FastifyBaseLogger
     // base document
     document: Partial<OpenAPIV3.Document> | Partial<OpenAPIV3_1.Document>
     // if you need to use different base document for different role

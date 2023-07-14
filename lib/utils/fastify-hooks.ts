@@ -1,4 +1,4 @@
-import { FastifyInstance } from 'fastify'
+import { type FastifyInstance } from 'fastify'
 import { kDocumentGenerator } from '../symbols'
 
 export function addHooks (fastify: FastifyInstance): void {

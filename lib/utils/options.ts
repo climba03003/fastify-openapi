@@ -1,9 +1,9 @@
 import DeepMerge from 'deepmerge'
-import { RouteShorthandOptions } from 'fastify'
-import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types'
-import { DocumentGeneratorPlugin } from '../document-generator'
+import { type RouteShorthandOptions } from 'fastify'
+import { type OpenAPIV3, type OpenAPIV3_1 } from 'openapi-types'
+import { type DocumentGeneratorPlugin } from '../document-generator'
 import { OpenAPIPlugin } from '../plugins/openapi'
-import { routeBelongTo, RouteBelongToFunc } from './hooks'
+import { routeBelongTo, type RouteBelongToFunc } from './hooks'
 
 interface DocumentRouteOption {
   ui: string | false

@@ -26,7 +26,7 @@ t.test('invalid preset', async function (t) {
   t.plan(1)
   const fastify = Fastify()
   await fastify.register(FastifyOpenAPI, {
-    // @ts-expect-error
+    // @ts-expect-error test invalid option
     preset: true
   })
   await fastify.ready()

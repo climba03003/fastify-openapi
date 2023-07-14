@@ -1,5 +1,5 @@
-import { FastifySchema } from 'fastify'
-import { OpenAPIV3 } from 'openapi-types'
+import { type FastifySchema } from 'fastify'
+import { type OpenAPIV3 } from 'openapi-types'
 
 export const baseDocument: Partial<OpenAPIV3.Document> = {
   info: {

@@ -1,4 +1,4 @@
-import { DocumentGenerator } from '../document-generator'
+import { type DocumentGenerator } from '../document-generator'
 
 export function flattenJSONSchema (that: DocumentGenerator, schema: any): any {
   // we should handle top level `oneOf`, `anyOf` and `allOf` first

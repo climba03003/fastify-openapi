@@ -1,4 +1,4 @@
-import { DocumentGeneratorPlugin } from '../document-generator'
+import { type DocumentGeneratorPlugin } from '../document-generator'
 
 export const TypeboxPlugin: DocumentGeneratorPlugin = function (instance) {
   instance.addHook('onTransform', function (_, schema: any) {

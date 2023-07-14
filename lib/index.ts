@@ -1,19 +1,19 @@
-import { FastifyPluginAsync } from 'fastify'
+import { type FastifyPluginAsync } from 'fastify'
 import FastifyPlugin from 'fastify-plugin'
-import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types'
+import { type OpenAPIV3, type OpenAPIV3_1 } from 'openapi-types'
 import { DocumentGenerator } from './document-generator'
 import { kDocumentGenerator } from './symbols'
 import { addHooks } from './utils/fastify-hooks'
 import { addRoutes } from './utils/fastify-routes'
-import { normalizePluginOption, OpenAPIPluginOptions, RoutesOptions } from './utils/options'
+import { normalizePluginOption, type OpenAPIPluginOptions, type RoutesOptions } from './utils/options'
 
 declare module 'openapi-types' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace OpenAPIV3 {
     // the change here will affect both openapi@3 and openapi@3.1
+    // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
     interface Document {
-      // we allow `x-` prefix extension
-      [extension: `x-${string}`]: any
+      [key: `x-${string}`]: any
     }
   }
 }
@@ -29,9 +29,9 @@ declare module 'fastify' {
     cookies?: unknown
     consumes?: string[]
     produces?: string[]
-    callbacks?: { [callback: string]: OpenAPIV3.CallbackObject }
+    callbacks?: Record<string, OpenAPIV3.CallbackObject>
     deprecated?: boolean
-    security?: Array<{ [securityLabel: string]: string[] }>
+    security?: Array<Record<string, string[]>>
     servers?: OpenAPIV3.ServerObject[]
     // we allow any `x-` prefix extension
     [extension: `x-${string}`]: any
@@ -59,7 +59,7 @@ const OpenAPI: FastifyPluginAsync<OpenAPIPluginOptions> = async function (fastif
     fastify[kDocumentGenerator].plugin(plugin)
   }
 
-  const openapi = {}
+  const openapi: any = {}
   let isGenerated = false
   Object.defineProperties(openapi, {
     generate: {

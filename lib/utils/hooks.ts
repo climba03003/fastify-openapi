@@ -1,8 +1,8 @@
 import DeepMerge from 'deepmerge'
-import { RouteOptions } from 'fastify'
-import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types'
-import { DocumentGenerator } from '../document-generator'
-import { ParameterSchema } from './parameter'
+import { type RouteOptions } from 'fastify'
+import { type OpenAPIV3, type OpenAPIV3_1 } from 'openapi-types'
+import { type DocumentGenerator } from '../document-generator'
+import { type ParameterSchema } from './parameter'
 
 export type DocumentGeneratorHookName =
   'onPath' |

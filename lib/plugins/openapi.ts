@@ -1,4 +1,4 @@
-import { DocumentGeneratorPlugin } from '../document-generator'
+import { type DocumentGeneratorPlugin } from '../document-generator'
 import { convertJSONSchemaToParameterArray } from '../utils/parameter'
 
 export const OpenAPIPlugin: DocumentGeneratorPlugin = function (instance) {

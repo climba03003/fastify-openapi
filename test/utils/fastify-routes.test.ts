@@ -1,5 +1,5 @@
 import DeepMerge from 'deepmerge'
-import Fastify, { FastifySchema } from 'fastify'
+import Fastify, { type FastifySchema } from 'fastify'
 import t from 'tap'
 import { FastifyOpenAPI } from '../../lib'
 import { validate } from '../ajv'
